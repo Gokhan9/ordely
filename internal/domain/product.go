@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gokhan/orderly/internal/repository/db"
@@ -37,13 +38,17 @@ type ProductUseCase interface {
 }
 
 func NewProductResponse(product db.Product) ProductResponse {
+	var priceStr string
+	f, _ := product.Price.Float64Value()
+	priceStr = fmt.Sprintf("%.2f", f.Float64)
+
 	return ProductResponse{
 		ID:          product.ID,
 		Name:        product.Name,
 		Description: product.Description,
-		Price:       product.Price.String(),
+		Price:       priceStr,
 		Stock:       product.Stock,
 		CategoryID:  product.CategoryID,
-		CreatedAt:   product.CreatedAt,
+		CreatedAt:   product.CreatedAt.Time,
 	}
 }

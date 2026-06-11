@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gokhan/orderly/internal/repository/db"
 )
@@ -27,10 +28,14 @@ type OrderUseCase interface {
 }
 
 func NewOrderResponse(order db.Order) OrderResponse {
+	var priceStr string
+	f, _ := order.TotalPrice.Float64Value()
+	priceStr = fmt.Sprintf("%.2f", f.Float64)
+
 	return OrderResponse{
 		ID:         order.ID,
 		UserID:     order.UserID,
-		TotalPrice: order.TotalPrice.String(),
+		TotalPrice: priceStr,
 		Status:     order.Status,
 	}
 }

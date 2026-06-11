@@ -51,8 +51,8 @@ func (u *orderUseCase) CreateOrder(ctx context.Context, userID int64, req domain
 			// Add order item
 			itemPrice := product.Price
 			_, err = q.CreateOrderItem(ctx, db.CreateOrderItemParams{
-				Order_id:  order.ID,
-				Product_id: product.ID,
+				OrderID:   order.ID,
+				ProductID: product.ID,
 				Quantity:  itemReq.Quantity,
 				Price:     itemPrice,
 			})

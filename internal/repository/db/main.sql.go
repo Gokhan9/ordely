@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCategory = `-- name: CreateCategory :one
@@ -18,7 +20,7 @@ INSERT INTO categories (
 `
 
 func (q *Queries) CreateCategory(ctx context.Context, name string) (Category, error) {
-	row := q.db.QueryRowContext(ctx, createCategory, name)
+	row := q.db.QueryRow(ctx, createCategory, name)
 	var i Category
 	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
 	return i, err
@@ -35,13 +37,13 @@ INSERT INTO orders (
 `
 
 type CreateOrderParams struct {
-	UserID     int64  `json:"user_id"`
-	TotalPrice string `json:"total_price"`
-	Status     string `json:"status"`
+	UserID     int64          `json:"user_id"`
+	TotalPrice pgtype.Numeric `json:"total_price"`
+	Status     string         `json:"status"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
-	row := q.db.QueryRowContext(ctx, createOrder, arg.UserID, arg.TotalPrice, arg.Status)
+	row := q.db.QueryRow(ctx, createOrder, arg.UserID, arg.TotalPrice, arg.Status)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -65,14 +67,14 @@ INSERT INTO order_items (
 `
 
 type CreateOrderItemParams struct {
-	OrderID   int64  `json:"order_id"`
-	ProductID int64  `json:"product_id"`
-	Quantity  int32  `json:"quantity"`
-	Price     string `json:"price"`
+	OrderID   int64          `json:"order_id"`
+	ProductID int64          `json:"product_id"`
+	Quantity  int32          `json:"quantity"`
+	Price     pgtype.Numeric `json:"price"`
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
-	row := q.db.QueryRowContext(ctx, createOrderItem,
+	row := q.db.QueryRow(ctx, createOrderItem,
 		arg.OrderID,
 		arg.ProductID,
 		arg.Quantity,
@@ -102,15 +104,15 @@ INSERT INTO products (
 `
 
 type CreateProductParams struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
-	Stock       int32  `json:"stock"`
-	CategoryID  int64  `json:"category_id"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Price       pgtype.Numeric `json:"price"`
+	Stock       int32          `json:"stock"`
+	CategoryID  int64          `json:"category_id"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
-	row := q.db.QueryRowContext(ctx, createProduct,
+	row := q.db.QueryRow(ctx, createProduct,
 		arg.Name,
 		arg.Description,
 		arg.Price,
@@ -149,7 +151,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Username,
 		arg.Email,
 		arg.HashedPassword,
@@ -174,7 +176,7 @@ WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, id int64) (Product, error) {
-	row := q.db.QueryRowContext(ctx, getProduct, id)
+	row := q.db.QueryRow(ctx, getProduct, id)
 	var i Product
 	err := row.Scan(
 		&i.ID,
@@ -194,7 +196,7 @@ WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, username)
+	row := q.db.QueryRow(ctx, getUser, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -221,7 +223,7 @@ type ListProductsParams struct {
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, listProducts, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listProducts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -242,9 +244,6 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -259,13 +258,13 @@ RETURNING id, user_id, total_price, status, created_at
 `
 
 type UpdateOrderParams struct {
-	ID         int64  `json:"id"`
-	TotalPrice string `json:"total_price"`
-	Status     string `json:"status"`
+	ID         int64          `json:"id"`
+	TotalPrice pgtype.Numeric `json:"total_price"`
+	Status     string         `json:"status"`
 }
 
 func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (Order, error) {
-	row := q.db.QueryRowContext(ctx, updateOrder, arg.ID, arg.TotalPrice, arg.Status)
+	row := q.db.QueryRow(ctx, updateOrder, arg.ID, arg.TotalPrice, arg.Status)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -290,7 +289,7 @@ type UpdateProductStockParams struct {
 }
 
 func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error) {
-	row := q.db.QueryRowContext(ctx, updateProductStock, arg.ID, arg.Stock)
+	row := q.db.QueryRow(ctx, updateProductStock, arg.ID, arg.Stock)
 	var i Product
 	err := row.Scan(
 		&i.ID,

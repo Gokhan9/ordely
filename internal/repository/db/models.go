@@ -5,47 +5,47 @@
 package db
 
 import (
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Category struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int64              `json:"id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Order struct {
-	ID         int64     `json:"id"`
-	UserID     int64     `json:"user_id"`
-	TotalPrice string    `json:"total_price"`
-	Status     string    `json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID         int64              `json:"id"`
+	UserID     int64              `json:"user_id"`
+	TotalPrice pgtype.Numeric     `json:"total_price"`
+	Status     string             `json:"status"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type OrderItem struct {
-	ID        int64  `json:"id"`
-	OrderID   int64  `json:"order_id"`
-	ProductID int64  `json:"product_id"`
-	Quantity  int32  `json:"quantity"`
-	Price     string `json:"price"`
+	ID        int64          `json:"id"`
+	OrderID   int64          `json:"order_id"`
+	ProductID int64          `json:"product_id"`
+	Quantity  int32          `json:"quantity"`
+	Price     pgtype.Numeric `json:"price"`
 }
 
 type Product struct {
-	ID          int64     `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       string    `json:"price"`
-	Stock       int32     `json:"stock"`
-	CategoryID  int64     `json:"category_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          int64              `json:"id"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Price       pgtype.Numeric     `json:"price"`
+	Stock       int32              `json:"stock"`
+	CategoryID  int64              `json:"category_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type User struct {
-	ID                int64     `json:"id"`
-	Username          string    `json:"username"`
-	Email             string    `json:"email"`
-	HashedPassword    string    `json:"hashed_password"`
-	FullName          string    `json:"full_name"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
-	CreatedAt         time.Time `json:"created_at"`
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	HashedPassword    string             `json:"hashed_password"`
+	FullName          string             `json:"full_name"`
+	PasswordChangedAt pgtype.Timestamptz `json:"password_changed_at"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 }
