@@ -5,7 +5,14 @@ import (
 	"time"
 
 	"github.com/gokhan/orderly/internal/repository/db"
+	"github.com/go-playground/validator/v10"
 )
+
+var Validate *validator.Validate
+
+func init() {
+	Validate = validator.New()
+}
 
 type CreateUserRequest struct {
 	Username string `json:"username" validate:"required,alphanum"`

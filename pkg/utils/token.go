@@ -10,14 +10,16 @@ import (
 
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
+	UserID    int64     `json:"user_id"`
 	Username  string    `json:"username"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func CreateToken(username string, duration time.Duration, secretKey string) (string, error) {
+func CreateToken(userID int64, username string, duration time.Duration, secretKey string) (string, error) {
 	payload := &Payload{
 		ID:        uuid.New(),
+		UserID:    userID,
 		Username:  username,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
@@ -25,6 +27,7 @@ func CreateToken(username string, duration time.Duration, secretKey string) (str
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":         payload.ID,
+		"user_id":    payload.UserID,
 		"username":   payload.Username,
 		"issued_at":  payload.IssuedAt.Unix(),
 		"expired_at": payload.ExpiredAt.Unix(),
@@ -54,6 +57,7 @@ func VerifyToken(token string, secretKey string) (*Payload, error) {
 
 	payload := &Payload{
 		ID:       uuid.MustParse(claims["id"].(string)),
+		UserID:   int64(claims["user_id"].(float64)),
 		Username: claims["username"].(string),
 	}
 

@@ -60,16 +60,34 @@ func (u *orderUseCase) CreateOrder(ctx context.Context, userID int64, req domain
 				return err
 			}
 
-			// Update total amount (simplified for demo, should handle numeric properly)
+			// Update Stock
+			_, err = q.UpdateProductStock(ctx, db.UpdateProductStockParams{
+				ID:    product.ID,
+				Stock: itemReq.Quantity,
+			})
+			if err != nil {
+				return err
+			}
+
+			// Update total amount
 			f, _ := product.Price.Float64Value()
 			totalAmount += f.Float64 * float64(itemReq.Quantity)
 		}
 
-		// 3. Update Order Total Price (Actually in real life we'd update it in the order table)
-		// For this demo, let's just return the response
-		orderResponse = domain.NewOrderResponse(order)
-		orderResponse.TotalPrice = fmt.Sprintf("%.2f", totalAmount)
+		// 3. Update Order Total Price
+		var finalTotalPrice pgtype.Numeric
+		finalTotalPrice.Scan(fmt.Sprintf("%.2f", totalAmount))
+		
+		updatedOrder, err := q.UpdateOrder(ctx, db.UpdateOrderParams{
+			ID:         order.ID,
+			TotalPrice: finalTotalPrice,
+			Status:     "completed",
+		})
+		if err != nil {
+			return err
+		}
 
+		orderResponse = domain.NewOrderResponse(updatedOrder)
 		return nil
 	})
 

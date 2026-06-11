@@ -58,3 +58,15 @@ INSERT INTO order_items (
 ) VALUES (
   $1, $2, $3, $4
 ) RETURNING *;
+
+-- name: UpdateOrder :one
+UPDATE orders
+SET total_price = $2, status = $3
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateProductStock :one
+UPDATE products
+SET stock = stock - $2
+WHERE id = $1
+RETURNING *;

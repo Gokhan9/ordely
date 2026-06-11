@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -11,19 +13,24 @@ import (
 	"github.com/gokhan/orderly/internal/repository/db"
 	"github.com/gokhan/orderly/internal/usecase"
 	"github.com/gokhan/orderly/pkg/config"
+	pkgLogger "github.com/gokhan/orderly/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	pkgLogger.SetupLogger()
+
 	config, err := config.LoadConfig(".")
 	if err != nil {
-		log.Fatal("cannot load config:", err)
+		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
 	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
+	defer connPool.Close()
 
 	store := db.NewStore(connPool)
 
@@ -71,6 +78,22 @@ func main() {
 		})
 	})
 
-	log.Printf("Server starting on %s", config.HTTPServerAddress)
-	log.Fatal(app.Listen(config.HTTPServerAddress))
+	// Graceful Shutdown
+	go func() {
+		log.Info().Msgf("Server starting on %s", config.HTTPServerAddress)
+		if err := app.Listen(config.HTTPServerAddress); err != nil {
+			log.Fatal().Err(err).Msg("server failed to start")
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	log.Info().Msg("Shutting down server...")
+	if err := app.Shutdown(); err != nil {
+		log.Fatal().Err(err).Msg("server forced to shutdown")
+	}
+
+	log.Info().Msg("Server exited properly")
 }

@@ -59,7 +59,7 @@ func (u *userUseCase) LoginUser(ctx context.Context, req domain.LoginUserRequest
 		return domain.LoginUserResponse{}, err
 	}
 
-	accessToken, err := utils.CreateToken(user.Username, duration, u.config.TokenSymmetricKey)
+	accessToken, err := utils.CreateToken(user.ID, user.Username, duration, u.config.TokenSymmetricKey)
 	if err != nil {
 		return domain.LoginUserResponse{}, err
 	}

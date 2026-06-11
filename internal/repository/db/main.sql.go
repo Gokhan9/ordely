@@ -250,3 +250,56 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 	}
 	return items, nil
 }
+
+const updateOrder = `-- name: UpdateOrder :one
+UPDATE orders
+SET total_price = $2, status = $3
+WHERE id = $1
+RETURNING id, user_id, total_price, status, created_at
+`
+
+type UpdateOrderParams struct {
+	ID         int64  `json:"id"`
+	TotalPrice string `json:"total_price"`
+	Status     string `json:"status"`
+}
+
+func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (Order, error) {
+	row := q.db.QueryRowContext(ctx, updateOrder, arg.ID, arg.TotalPrice, arg.Status)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TotalPrice,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateProductStock = `-- name: UpdateProductStock :one
+UPDATE products
+SET stock = stock - $2
+WHERE id = $1
+RETURNING id, name, description, price, stock, category_id, created_at
+`
+
+type UpdateProductStockParams struct {
+	ID    int64 `json:"id"`
+	Stock int32 `json:"stock"`
+}
+
+func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, updateProductStock, arg.ID, arg.Stock)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+		&i.Stock,
+		&i.CategoryID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
