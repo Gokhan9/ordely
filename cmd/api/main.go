@@ -9,6 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
+	_ "github.com/gokhan/orderly/docs"
 	"github.com/gokhan/orderly/internal/delivery/http"
 	"github.com/gokhan/orderly/internal/repository/db"
 	"github.com/gokhan/orderly/internal/usecase"
@@ -17,6 +19,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
+
+// @title Orderly API
+// @version 1.0
+// @description High performance e-commerce API.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Gökhan
+// @contact.email gokhan@example.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and then your token.
 
 func main() {
 	pkgLogger.SetupLogger()
@@ -70,6 +91,8 @@ func main() {
 
 	// Protected Order Routes
 	protected.Post("/orders", orderHandler.CreateOrder)
+
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{

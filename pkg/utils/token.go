@@ -16,6 +16,7 @@ type Payload struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
+// * TOKEN CREATE
 func CreateToken(userID int64, username string, duration time.Duration, secretKey string) (string, error) {
 	payload := &Payload{
 		ID:        uuid.New(),
@@ -36,6 +37,7 @@ func CreateToken(userID int64, username string, duration time.Duration, secretKe
 	return jwtToken.SignedString([]byte(secretKey))
 }
 
+// * TOKEN DOĞRULAMA
 func VerifyToken(token string, secretKey string) (*Payload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)

@@ -17,6 +17,19 @@ func NewOrderHandler(useCase domain.OrderUseCase) *OrderHandler {
 	}
 }
 
+// CreateOrder godoc
+// @Summary Create a new order
+// @Description Place a new order with multiple products
+// @Tags orders
+// @Accept  json
+// @Produce  json
+// @Param order body domain.CreateOrderRequest true "Order Info"
+// @Success 201 {object} domain.OrderResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /orders [post]
+// @Security BearerAuth
 func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 	payload := c.Locals(authorizationPayloadKey).(*utils.Payload)
 	
